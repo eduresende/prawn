@@ -8,6 +8,65 @@
 #
 
 module Prawn
+  class GraphicStateStack
+    attr_accessor :stack
+    
+    def initialize(previous_state = nil)
+      self.stack = [GraphicState.new(previous_state)]
+    end
+    
+    def save_graphic_state
+      stack.push(GraphicState.new(current_state))
+    end
+    
+    def restore_graphic_state
+      if stack.size == 0
+        raise Prawn::Errors::EmptyGraphicStateStack, 
+          "\n You have reached the end of the graphic state stack" 
+      end
+      stack.pop
+    end
+    
+    def current_state
+      stack.last
+    end
+    
+    def present?
+      stack.size > 0
+    end
+      
+  end
+  
+  class GraphicState
+    attr_accessor :color_space, :dash, :cap_style, :join_style, :line_width, :fill_color, :stroke_color
+    
+    def initialize(previous_state = nil)
+      @color_space = previous_state ? previous_state.color_space : {}
+      @fill_color = previous_state ? previous_state.fill_color : "000000"
+      @stroke_color = previous_state ? previous_state.stroke_color : "000000"
+      @dash = previous_state ? previous_state.dash : { :dash => nil, :space => nil, :phase => 0 }
+      @cap_style = previous_state ? previous_state.cap_style : :butt
+      @join_style = previous_state ? previous_state.join_style : :miter
+      @line_width = previous_state ? previous_state.line_width : 1
+    end
+    
+    def dash_setting
+      "[#{@dash[:dash]} #{@dash[:space]}] #{@dash[:phase]} d"
+    end
+  end
+  
+  class Core::Page
+    def current_graphic_state
+      stack.current_state
+    end
+    
+    def current_dash_state
+      stack.current_state.dash
+    end
+    
+    
+  end
+  
   class Document
     module GraphicsState
 
@@ -30,8 +89,18 @@ module Prawn
       #     text "rotated text"
       #   end
       #
-      def save_graphics_state
+      
+      def open_graphics_state
         add_content "q"
+      end
+      
+      def close_graphics_state
+        add_content "Q"
+      end
+        
+      def save_graphics_state
+        current_graphic_stack.save_graphic_state unless state.page.in_stamp_stream?
+        open_graphics_state
         if block_given?
           yield
           restore_graphics_state
@@ -41,8 +110,23 @@ module Prawn
       # Pops the last saved graphics state off the graphics state stack and
       # restores the state to those values
       def restore_graphics_state
-        add_content "Q"
+        if current_graphic_stack.stack.size == 0
+          raise Prawn::Errors::EmptyGraphicStateStack, 
+            "\n You have reached the end of the graphic state stack" 
+        end
+        close_graphics_state 
+        current_graphic_stack.restore_graphic_state unless state.page.in_stamp_stream?
       end
+      
+      def current_graphic_stack
+        state.page.stack
+      end
+      
+      def current_graphic_state
+        current_graphic_stack.current_state || 
+          save_graphics_state; current_graphic_stack.current_state
+      end
+      
     end
   end
 end

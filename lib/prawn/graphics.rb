@@ -100,8 +100,8 @@ module Prawn
     # Sets line thickness to the <tt>width</tt> specified.
     #
     def line_width=(width)
-      @line_width = width
-      add_content("#{width} w")
+      self.current_line_width = width
+      write_line_width
     end
 
     # When called without an argument, returns the current line thickness.
@@ -116,7 +116,7 @@ module Prawn
       if width
         self.line_width = width
       else
-        (defined?(@line_width) && @line_width) || 1
+        current_line_width
       end
     end
 
@@ -296,6 +296,18 @@ module Prawn
     end
     
     private
+    
+    def current_line_width
+      current_graphic_state.line_width
+    end
+    
+    def current_line_width=(width)
+      current_graphic_state.line_width = width
+    end
+    
+    def write_line_width
+      add_content("#{current_line_width} w")
+    end
 
     def map_to_absolute(*point)
       x,y = point.flatten
