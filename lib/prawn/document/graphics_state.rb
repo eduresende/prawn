@@ -32,6 +32,7 @@ module Prawn
       #
       def save_graphics_state
         add_content "q"
+        state.page.stack.save_graphic_state
         if block_given?
           yield
           restore_graphics_state
@@ -41,7 +42,12 @@ module Prawn
       # Pops the last saved graphics state off the graphics state stack and
       # restores the state to those values
       def restore_graphics_state
-        add_content "Q"
+        if state.page.stack.present?
+          add_content "Q" 
+          state.page.stack.restore_graphic_state
+        end
+        # require 'drop_to_console'
+        # console_for(binding)
       end
     end
   end

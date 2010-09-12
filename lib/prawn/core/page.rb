@@ -9,7 +9,7 @@
 module Prawn
   module Core
     class Page #:nodoc:
-      attr_accessor :document, :content, :dictionary, :margins
+      attr_accessor :document, :content, :dictionary, :margins, :stack
 
       def initialize(document, options={})
         @document = document
@@ -17,7 +17,7 @@ module Prawn
                                            :right   => 36,
                                            :top     => 36,
                                            :bottom  => 36  }
-
+        @stack = GraphicStateStack.new
         if options[:object_id]
           init_from_object(options)
         else
@@ -194,6 +194,36 @@ module Prawn
       end
 
     end
+    
+    class GraphicStateStack
+      attr_accessor :stack
+      
+      def initialize()
+        self.stack = [GraphicState.new]
+      end
+      
+      def save_graphic_state
+        stack.push(GraphicState.new)
+      end
+      
+      def restore_graphic_state
+        stack.pop
+      end
+      
+      def current_state
+        stack.last
+      end
+      
+      def present?
+        stack.size > 1
+      end
+        
+    end
+    
+    class GraphicState
+      attr_accessor :color_space
+    end
+    
   end
 end
 

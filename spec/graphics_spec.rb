@@ -256,7 +256,7 @@ describe "When using graphics states" do
     
     @pdf.save_graphics_state
   end
-
+  
   it "should add the right content on restore_graphics_state" do
     @pdf.expects(:add_content).with('Q')
     
@@ -276,20 +276,20 @@ describe "When using graphics states" do
   
   it "should add the previous color space when restoring to a graphic state with different color space" do
     @pdf.stroke_color '000000'  # Prawn thinks color space is RGB
-    colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
-    colors.stroke_color_space_count.should == 1
     @pdf.save_graphics_state
-    @pdf.stroke_color 0, 0, 0, 0  # Prawn thinks color space is CMYK
-    colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
-    colors.stroke_color_space_count.should == 2
+    @pdf.stroke_color 0, 0, 0, 0  # Prawn thinks color space is CMYK    
     @pdf.restore_graphics_state  # Oops, now PDF thinks color space is RGB again
+    # require 'drop_to_console'
+    # console_for(binding)
+    # 
     @pdf.stroke_color 0, 0, 100, 0  # This won't work!
     colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
+    colors.color_space.should == :DeviceCMYK
     colors.stroke_color_space_count.should == 3
   end
   
   it "should not add extra graphic space closings when rendering multiple times" do
-    state = PDF::Inspector::Graphics::State.analyze(@pdf.render)
+    @pdf.render
     state = PDF::Inspector::Graphics::State.analyze(@pdf.render)
     state.save_graphics_state_count.should == 1
     state.restore_graphics_state_count.should == 1

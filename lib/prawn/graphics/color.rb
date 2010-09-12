@@ -145,8 +145,8 @@ module Prawn
 
       def set_color_space(type, color_space)
         # don't set the same color space again
-        return if @color_space[type] == color_space
-        @color_space[type] = color_space
+        return if state.page.stack.current_state.color_space == color_space
+        state.page.stack.current_state.color_space = color_space
 
         unless COLOR_SPACES.include?(color_space)
           raise ArgumentError, "unknown color space: '#{color_space}'"
