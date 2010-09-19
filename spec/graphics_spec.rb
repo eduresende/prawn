@@ -279,13 +279,10 @@ describe "When using graphics states" do
     @pdf.save_graphics_state
     @pdf.stroke_color 0, 0, 0, 0  # Prawn thinks color space is CMYK    
     @pdf.restore_graphics_state  # Oops, now PDF thinks color space is RGB again
-    # require 'drop_to_console'
-    # console_for(binding)
-    # 
     @pdf.stroke_color 0, 0, 100, 0  # This won't work!
     colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
     colors.color_space.should == :DeviceCMYK
-    colors.stroke_color_space_count.should == 3
+    colors.stroke_color_space_count.should == 4
   end
   
   it "should not add extra graphic space closings when rendering multiple times" do
@@ -293,6 +290,13 @@ describe "When using graphics states" do
     state = PDF::Inspector::Graphics::State.analyze(@pdf.render)
     state.save_graphics_state_count.should == 1
     state.restore_graphics_state_count.should == 1
+  end
+  
+  it "should raise error if closing an empty graphic stack" do
+    assert_raise Prawn::Errors::EmptyGraphicStateStack do
+      @pdf.render
+      @pdf.restore_graphics_state
+    end
   end
 end
 

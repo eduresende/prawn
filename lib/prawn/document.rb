@@ -247,7 +247,7 @@ module Prawn
 
        apply_margin_options(options)
 
-       use_graphic_settings
+       use_graphic_settings(last_page)
       
        unless options[:orphan]
          state.insert_page(state.page, @page_number)
@@ -524,12 +524,14 @@ module Prawn
     
     private
 
-    def use_graphic_settings
+    def use_graphic_settings(last_page = nil)
       update_colors
       line_width(line_width) unless line_width == 1
       cap_style(cap_style) unless cap_style == :butt
-      join_style(join_style) unless join_style == :miter
-      dash(dash[:dash], dash) if dashed?
+      join_style(join_style) unless join_style == :miter      
+      if last_page && dashed?(last_page)
+        dash(last_page.current_dash_state[:dash], last_page.current_dash_state)
+      end 
     end
 
     def generate_margin_box

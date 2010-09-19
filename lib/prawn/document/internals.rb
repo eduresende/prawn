@@ -106,7 +106,7 @@ module Prawn
         (1..page_count).each do |i|
           go_to_page i
           repeaters.each { |r| r.run(i) }
-          restore_graphics_state
+          restore_graphics_state if current_graphic_stack.present?
           state.page.finalize
         end
       end

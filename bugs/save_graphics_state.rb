@@ -10,7 +10,6 @@ pdf = Prawn::Document.generate("graphics_state.pdf", :page_layout => :landscape)
   fill { rectangle([10, bounds.top], 10, 10) }
   save_graphics_state
   fill_color 0, 0, 0, 0  # Prawn thinks color space is CMYK
-  fill_color 6, 6, 6, 6
   fill { rectangle([20, bounds.top], 10, 10) }
   restore_graphics_state  # Oops, now PDF thinks color space is RGB again
   fill_color 0, 0, 100, 0  # This won't work!
