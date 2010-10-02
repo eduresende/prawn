@@ -53,16 +53,16 @@ module Prawn
         return page.current_graphic_state.dash != undashed_setting if page
         current_dash_state != undashed_setting
       end
+      
+      def write_stroke_dash
+        add_content dash_setting
+      end
 
     private
       
       def undashed_setting
         { :dash => nil, :space => nil, :phase => 0 }
       end
-
-      def write_stroke_dash
-        add_content dash_setting
-      end  
       
       private 
         
