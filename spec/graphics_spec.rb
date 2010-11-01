@@ -212,12 +212,12 @@ describe "When setting colors" do
 
     #colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
     # colors.fill_color_count.should == 3
-    # colors.stroke_color_count.should == 3
+    # colors.stroke_color_count.should == 
 
     @pdf.start_new_page
     colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
-    colors.fill_color_count.should == 4
-    colors.stroke_color_count.should == 4
+    colors.fill_color_count.should == 3
+    colors.stroke_color_count.should == 2
 
     colors.fill_color.should   == [0.8,1.0,0.0]
     colors.stroke_color.should == [1.0,0.0,0.8]
@@ -280,10 +280,33 @@ describe "When using graphics states" do
     @pdf.stroke_color 0, 0, 0, 0
     @pdf.restore_graphics_state 
     @pdf.stroke_color 0, 0, 100, 0
+    @pdf.current_graphic_state.color_space.should == {:stroke=>:DeviceCMYK}
     colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
     colors.color_space.should == :DeviceCMYK
-    colors.stroke_color_space_count.should == 4
+    colors.stroke_color_space_count.should == 2
   end
+  
+  it "the current graphic state should keep track of previous unchanged settings" do
+    @pdf.stroke_color '000000'
+    @pdf.save_graphics_state
+    @pdf.dash 5
+    @pdf.save_graphics_state
+    @pdf.cap_style :round
+    @pdf.save_graphics_state 
+    @pdf.fill_color 0, 0, 100, 0
+    @pdf.save_graphics_state
+    
+    @pdf.current_graphic_state.stroke_color.should == "000000" 
+    @pdf.current_graphic_state.join_style.should == :miter
+    @pdf.current_graphic_state.fill_color.should == [0, 0, 100, 0] 
+    @pdf.current_graphic_state.cap_style.should == :round 
+    @pdf.current_graphic_state.color_space.should == {:fill=>:DeviceCMYK,
+                                                                   :stroke=>:DeviceRGB} 
+    @pdf.current_graphic_state.dash.should == {:space=>5, :phase=>0, :dash=>5}
+    @pdf.current_graphic_state.line_width.should == 1
+  end
+    
+    
   
   it "should not add extra graphic space closings when rendering multiple times" do
     @pdf.render
@@ -291,6 +314,15 @@ describe "When using graphics states" do
     state.save_graphics_state_count.should == 1
     state.restore_graphics_state_count.should == 1
   end
+  
+  it "should add extra graphic state enclosings when content is added on multiple renderings" do
+    @pdf.render
+    @pdf.text "Adding a bit more content"
+    state = PDF::Inspector::Graphics::State.analyze(@pdf.render)
+    state.save_graphics_state_count.should == 2
+    state.restore_graphics_state_count.should == 2
+  end
+    
   
   it "should raise error if closing an empty graphic stack" do
     assert_raise Prawn::Errors::EmptyGraphicStateStack do

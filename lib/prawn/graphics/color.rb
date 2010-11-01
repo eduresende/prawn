@@ -146,7 +146,7 @@ module Prawn
       def set_color_space(type, color_space)
         # don't set the same color space again
         return if current_color_space(type) == color_space
-        current_color_space = color_space, type
+        set_current_color_space(color_space, type)
 
         unless COLOR_SPACES.include?(color_space)
           raise ArgumentError, "unknown color space: '#{color_space}'"
@@ -203,8 +203,9 @@ module Prawn
         current_graphic_state.color_space[type]
       end
       
-      def current_color_space=(color_space, type)
-        current_graphic_state.color_space[type] = color_space
+      def set_current_color_space(color_space, type)
+        save_graphics_state if current_graphic_state.nil? 
+        self.current_graphic_state.color_space[type] = color_space
       end
       
       def current_fill_color 
@@ -234,7 +235,7 @@ module Prawn
       def write_color(color, operator)
         add_content "#{color} #{operator}"
       end
-      
+     
     end
   end
 end

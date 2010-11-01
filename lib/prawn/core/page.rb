@@ -48,9 +48,10 @@ module Prawn
         @stamp_stream     = ""
         @stamp_dictionary = dictionary
 
-        document.send(:update_colors)
+        document.open_graphics_state
+        document.send(:freeze_stamp_graphics)
         yield if block_given?
-        document.send(:update_colors)
+        document.close_graphics_state
 
         @stamp_dictionary.data[:Length] = @stamp_stream.length + 1
         @stamp_dictionary << @stamp_stream

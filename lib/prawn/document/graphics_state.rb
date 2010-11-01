@@ -16,7 +16,7 @@ module Prawn
     end
     
     def save_graphic_state
-      stack.push(GraphicState.new)
+      stack.push(GraphicState.new(current_state))
     end
     
     def restore_graphic_state
@@ -90,13 +90,17 @@ module Prawn
       #   end
       #
       
-      def start_graphics_state
+      def open_graphics_state
         add_content "q"
+      end
+      
+      def close_graphics_state
+        add_content "Q"
       end
         
       def save_graphics_state
-        start_graphics_state
-        current_graphic_stack.save_graphic_state
+        current_graphic_stack.save_graphic_state unless state.page.in_stamp_stream?
+        open_graphics_state
         if block_given?
           yield
           restore_graphics_state
@@ -106,13 +110,12 @@ module Prawn
       # Pops the last saved graphics state off the graphics state stack and
       # restores the state to those values
       def restore_graphics_state
-        #if state.page.stack.present?
-          
-          current_graphic_stack.restore_graphic_state
-          add_content "Q" 
-        #end
-        # require 'drop_to_console'
-        # console_for(binding)
+        if current_graphic_stack.stack.size == 0
+          raise Prawn::Errors::EmptyGraphicStateStack, 
+            "\n You have reached the end of the graphic state stack" 
+        end
+        close_graphics_state 
+        current_graphic_stack.restore_graphic_state unless state.page.in_stamp_stream?
       end
       
       def current_graphic_stack
@@ -120,7 +123,8 @@ module Prawn
       end
       
       def current_graphic_state
-        current_graphic_stack.current_state
+        current_graphic_stack.current_state || 
+          save_graphics_state; current_graphic_stack.current_state
       end
       
     end

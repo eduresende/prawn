@@ -528,7 +528,8 @@ module Prawn
     private
 
     def use_graphic_settings
-      update_colors
+      set_fill_color unless current_fill_color == "000000"
+      set_stroke_color unless current_stroke_color == "000000"
       write_line_width unless line_width == 1
       write_stroke_cap_style unless cap_style == :butt
       write_stroke_join_style unless join_style == :miter      

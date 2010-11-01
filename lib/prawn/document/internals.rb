@@ -54,6 +54,7 @@ module Prawn
       #  pdf.add_content("S") # stroke                    
       #
       def add_content(str)
+        save_graphics_state if current_graphic_state.nil?
         state.page.content << str << "\n"
       end  
 

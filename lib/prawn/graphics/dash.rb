@@ -49,8 +49,7 @@ module Prawn
       
       # Returns when stroke is dashed, false otherwise
       #
-      def dashed?(page = nil)
-        return page.current_graphic_state.dash != undashed_setting if page
+      def dashed?
         current_dash_state != undashed_setting
       end
       
