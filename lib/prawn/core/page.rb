@@ -6,9 +6,15 @@
 #
 # This is free software. Please see the LICENSE and COPYING files for details.
 #
+
+require 'prawn/document/graphics_state'
+
 module Prawn
   module Core
     class Page #:nodoc:
+      
+      include Prawn::Core::Page::GraphicsState
+      
       attr_accessor :document, :content, :dictionary, :margins, :stack
 
       def initialize(document, options={})

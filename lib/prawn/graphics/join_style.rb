@@ -31,11 +31,11 @@ module Prawn
       private
       
       def current_join_style  
-        current_graphic_state.join_style
+        graphic_state.join_style
       end
 
       def current_join_style=(style)  
-        current_graphic_state.join_style = style
+        graphic_state.join_style = style
       end
       
 

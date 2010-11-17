@@ -298,11 +298,11 @@ module Prawn
     private
     
     def current_line_width
-      current_graphic_state.line_width
+      graphic_state.line_width
     end
     
     def current_line_width=(width)
-      current_graphic_state.line_width = width
+      graphic_state.line_width = width
     end
     
     def write_line_width

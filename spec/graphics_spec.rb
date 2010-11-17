@@ -212,7 +212,6 @@ describe "When setting colors" do
 
     #colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
     # colors.fill_color_count.should == 3
-    # colors.stroke_color_count.should == 
 
     @pdf.start_new_page
     colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
@@ -280,10 +279,20 @@ describe "When using graphics states" do
     @pdf.stroke_color 0, 0, 0, 0
     @pdf.restore_graphics_state 
     @pdf.stroke_color 0, 0, 100, 0
-    @pdf.current_graphic_state.color_space.should == {:stroke=>:DeviceCMYK}
+    @pdf.graphic_state.color_space.should == {:stroke=>:DeviceCMYK}
     colors = PDF::Inspector::Graphics::Color.analyze(@pdf.render)
     colors.color_space.should == :DeviceCMYK
-    colors.stroke_color_space_count.should == 2
+    colors.stroke_color_space_count[:DeviceCMYK].should == 2
+  end
+  
+  it "should use the correct dash setting after restoring and starting new page" do
+    @pdf.dash 5
+    @pdf.save_graphics_state
+    @pdf.dash 10
+    @pdf.graphic_state.dash[:dash].should == 10
+    @pdf.restore_graphics_state 
+    @pdf.start_new_page
+    @pdf.graphic_state.dash[:dash].should == 5
   end
   
   it "the current graphic state should keep track of previous unchanged settings" do
@@ -296,14 +305,13 @@ describe "When using graphics states" do
     @pdf.fill_color 0, 0, 100, 0
     @pdf.save_graphics_state
     
-    @pdf.current_graphic_state.stroke_color.should == "000000" 
-    @pdf.current_graphic_state.join_style.should == :miter
-    @pdf.current_graphic_state.fill_color.should == [0, 0, 100, 0] 
-    @pdf.current_graphic_state.cap_style.should == :round 
-    @pdf.current_graphic_state.color_space.should == {:fill=>:DeviceCMYK,
-                                                                   :stroke=>:DeviceRGB} 
-    @pdf.current_graphic_state.dash.should == {:space=>5, :phase=>0, :dash=>5}
-    @pdf.current_graphic_state.line_width.should == 1
+    @pdf.graphic_state.stroke_color.should == "000000" 
+    @pdf.graphic_state.join_style.should == :miter
+    @pdf.graphic_state.fill_color.should == [0, 0, 100, 0] 
+    @pdf.graphic_state.cap_style.should == :round 
+    @pdf.graphic_state.color_space.should == {:fill=>:DeviceCMYK, :stroke=>:DeviceRGB} 
+    @pdf.graphic_state.dash.should == {:space=>5, :phase=>0, :dash=>5}
+    @pdf.graphic_state.line_width.should == 1
   end
     
     
@@ -318,6 +326,14 @@ describe "When using graphics states" do
   it "should add extra graphic state enclosings when content is added on multiple renderings" do
     @pdf.render
     @pdf.text "Adding a bit more content"
+    state = PDF::Inspector::Graphics::State.analyze(@pdf.render)
+    state.save_graphics_state_count.should == 2
+    state.restore_graphics_state_count.should == 2
+  end
+  
+  it "adds extra graphic state enclosings when new settings are applied on multiple renderings" do
+    @pdf.render
+    @pdf.stroke_color 0, 0, 0, 0
     state = PDF::Inspector::Graphics::State.analyze(@pdf.render)
     state.save_graphics_state_count.should == 2
     state.restore_graphics_state_count.should == 2

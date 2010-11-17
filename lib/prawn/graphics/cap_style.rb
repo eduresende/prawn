@@ -31,11 +31,11 @@ module Prawn
       private
 
       def current_cap_style  
-        current_graphic_state.cap_style
+        graphic_state.cap_style
       end
 
       def current_cap_style=(style)  
-        current_graphic_state.cap_style = style
+        graphic_state.cap_style = style
       end
 
       def write_stroke_cap_style

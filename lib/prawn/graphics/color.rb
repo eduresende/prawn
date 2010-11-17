@@ -200,28 +200,28 @@ module Prawn
       private
       
       def current_color_space(type)
-        current_graphic_state.color_space[type]
+        graphic_state.color_space[type]
       end
       
       def set_current_color_space(color_space, type)
-        save_graphics_state if current_graphic_state.nil? 
-        self.current_graphic_state.color_space[type] = color_space
+        save_graphics_state if graphic_state.nil? 
+        graphic_state.color_space[type] = color_space
       end
       
       def current_fill_color 
-        current_graphic_state.fill_color
+        graphic_state.fill_color
       end
 
       def current_fill_color=(color)  
-        current_graphic_state.fill_color = color
+        graphic_state.fill_color = color
       end
       
       def current_stroke_color 
-        current_graphic_state.stroke_color
+        graphic_state.stroke_color
       end
 
       def current_stroke_color=(color)  
-        current_graphic_state.stroke_color = color
+        graphic_state.stroke_color = color
       end
       
       def write_fill_color

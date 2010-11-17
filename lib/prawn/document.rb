@@ -240,11 +240,11 @@ module Prawn
          last_page_margins = last_page.margins
        end
        
-       page_options = {:size    => options[:size]   || last_page_size, 
-        :layout  => options[:layout] || last_page_layout,
-        :margins => last_page_margins}
+       page_options = {:size => options[:size] || last_page_size, 
+                       :layout  => options[:layout] || last_page_layout,
+                       :margins => last_page_margins}
         
-       page_options.merge!(:graphic_state => last_page.current_graphic_state) if last_page
+       page_options.merge!(:graphic_state => last_page.graphic_state) if last_page
 
        state.page = Prawn::Core::Page.new(self, page_options)
 
@@ -255,8 +255,6 @@ module Prawn
        unless options[:orphan]
          state.insert_page(state.page, @page_number)
          @page_number += 1
-
-         #save_graphics_state
         
          canvas { image(@background, :at => bounds.top_left) } if @background 
          @y = @bounding_box.absolute_top

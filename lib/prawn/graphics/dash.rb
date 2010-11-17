@@ -66,15 +66,15 @@ module Prawn
       private 
         
       def current_dash_state=(dash_options)  
-        current_graphic_state.dash = dash_options
+        graphic_state.dash = dash_options
       end
       
       def current_dash_state
-        current_graphic_state.dash
+        graphic_state.dash
       end
       
       def dash_setting
-        current_graphic_state.dash_setting
+        graphic_state.dash_setting
       end
       
     end
